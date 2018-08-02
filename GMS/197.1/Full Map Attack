@@ -1,0 +1,17 @@
+// v197
+
+[ENABLE]
+0165A7EA: // CUser::OnEffect
+db EB
+
+028995B6: // Removes Level Up Damage
+db EB
+
+[DISABLE]
+//75 ? 8d 85 ? ? ? ? 50 8d 4d ? e8 ? ? ? ? 8b
+0165A7EA: //  75 ? 81 ? 75 B1 A9 00 75 ?
+db 75
+
+028995B6: //  74 ? C7 87 ? ? 00 00 00 00 00 00 8B 0D
+//68 EA BA C4 04 FF [2 je above]
+db 74
