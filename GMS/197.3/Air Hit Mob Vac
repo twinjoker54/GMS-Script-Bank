@@ -1,0 +1,116 @@
+//Kami, By James, Pilplup, And Animalistic :D
+//197.3
+//nvm ppl counter was still the same lmao
+[ENABLE]
+
+alloc(Teleport,256)
+alloc(GetMobXY,128)
+alloc(Hook,128)
+alloc(MobX,4)
+alloc(MobY,4)
+alloc(Timer,4)
+alloc(People,4)
+registersymbol(MobX)
+registersymbol(MobY)
+registersymbol(People)
+label(GetMobXY_Return)
+label(Teleport_End)
+label(Return)
+
+define(Delay, %arg1)
+
+Timer:
+dd 0
+
+//From Summoned Skills Kami
+GetMobXY:
+push eax
+mov eax,[ecx+900] // 89 87 ? ? ? ? 8D ? ? ? ? ? 8B ? ? 89 ? ? 89 ? ? 8A
+mov [MobX],eax
+add [MobX], #-70 //Change for X-Distance
+
+mov eax,[ecx+900+4] // OFFSET ABOVE + 0x4
+mov [MobY],eax
+add [MobY], #0
+pop eax //Change for Y-Distance
+
+//Original of CVecCtrlMob::WorkUpdateActive
+push ebp
+mov ebp,esp
+push -01
+jmp GetMobXY_Return
+
+026A0AC0: // CVecCtrlMob::WorkUpdateActive
+//55 8B EC 6A ? 68 ? ? ? ? 64 ? ? ? ? ? 50 83 ? ? 56 57 A1 ? ? ? ? 33 C5 50 8D ? ? 64 ? ? ? ? ? 8B F9 89 ? ? 8B ? FF ? ? FF
+jmp GetMobXY
+GetMobXY_Return:
+
+//From Auto Key v2
+Hook:
+//People Counter, 1 Person = 2, 2 People = 3
+mov eax, [343327C] //Make an aob for this ASAP
+mov eax, [eax+4C]
+mov [People], eax
+cmp [People], #%arg2 //Change for People-Count
+jg Return
+
+//Timer
+inc [Timer] //increment the value of Timer
+cmp [Timer], Delay // comparison
+jne Return //jump if Timer!= Delay
+//People Counter
+cmp [People], #%arg2 //Change for People-Count
+jg Return
+
+//Timer
+mov [Timer], 0 //move 0 into Timer
+pushad
+call Teleport
+popad
+jmp Return
+
+//From Teleport
+Teleport:
+mov esi,[0342AF44] // CUserLocal: 8B 3D ? ? ? ? 8B CF F3 [address inside brackets]
+lea ecx,[esi+04]
+mov eax,[esi+04]
+mov eax,[eax+20]
+call eax
+test eax,eax
+je Teleport_End
+push [MobY] // Y
+push [MobX]// X
+push 00
+mov ecx,eax
+call 00CB5E30 // 55 8B EC ? ? 10 ? FF ? 10 8D ? 10 FF ? 0C 56 FF 50 40 85 C0 79 0C 68 ? ? ? ? ? ? E8 ? ? ? ? 5E [first]
+ret
+
+Teleport_End:
+ret
+
+01605315: // CMob::Update (only calls when in maps with mobs, useful if you get stuck in town while map rushing) //start!
+jmp Hook //jump to Hook
+Return:
+
+[DISABLE]
+
+//Original of CVecCtrlMob::WorkUpdateActive
+026A0AC0: // 55 8B EC 6A FF 68 ? ? ? ? 64 A1 00 00 00 00 50 83 EC ? 56 57 A1 ? ? ? ? 33 C5 50 8D ? ? 64 A3 00 00 00 00 8B F9 89 ? ? 8B ? FF
+push ebp
+mov ebp,esp
+push -01
+
+//Original of CMob::Update
+01605315: //68 ?? ?? ?? ?? 64 A1 00 00 00 00 50 81 ?? ?? ?? ?? ?? a1 ?? ?? ?? ?? 33 ?? 89 ? ? 53 56 57 50 8d ? ? 64 ? ? ? ? ? 8b ? 89 ? ? ? ? ? 33 c0  [second]
+push 02B51C28
+db 64 A1 00 00 00 00
+
+dealloc(Teleport)
+dealloc(GetMobXY,128)
+dealloc(Hook)
+dealloc(MobX,4)
+dealloc(MobY,4)
+dealloc(People,4)
+unregistersymbol(MobX)
+unregistersymbol(MobY)
+unregistersymbol(People)

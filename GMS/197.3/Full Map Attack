@@ -1,0 +1,18 @@
+// v197.3 FMA
+
+[ENABLE]
+0165A80A: // CUser::onEffect
+db EB
+
+//  74 ? C7 87 ? ? 00 00 00 00 00 00 8B 0D
+02899B66: // Removes Level Up Damage
+
+db EB
+
+[DISABLE]
+0165A80A:
+db 75
+
+02899B66: //  74 ? C7 87 ? ? 00 00 00 00 00 00 8B 0D
+//68 EA BA C4 04 FF [2 je above]
+db 74
